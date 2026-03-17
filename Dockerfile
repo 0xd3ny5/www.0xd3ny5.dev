@@ -27,6 +27,7 @@ COPY --from=builder /install /usr/local
 COPY alembic.ini gunicorn.conf.py ./
 COPY static/ static/
 COPY backend/ backend/
+COPY blog_posts/ blog_posts/
 
 RUN chown -R app:app /app
 USER app

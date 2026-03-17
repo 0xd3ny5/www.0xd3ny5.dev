@@ -4,6 +4,6 @@ import pathlib
 
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 
-TEMPLATES_DIR = PROJECT_ROOT / "templates"
+TEMPLATES_DIR = PROJECT_ROOT / "backend" / "templates"
 STATIC_DIR = PROJECT_ROOT / "static"
 BLOG_DIR = PROJECT_ROOT / "blog_posts"

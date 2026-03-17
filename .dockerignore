@@ -12,6 +12,6 @@ data.db
 .vscode
 *.md
 !blog_posts/*.md
-tests
+backend/tests
 htmlcov
 .coverage
