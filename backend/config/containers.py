@@ -2,19 +2,17 @@ from __future__ import annotations
 
 import typing
 
-from dependency_injector import containers
-from dependency_injector import providers
+from dependency_injector import containers, providers
 
+from backend.config import api_config
 from backend.src.infrastructure import orm
 from backend.src.infrastructure import uow as uow_impl
-from backend.config import api_config
 
 if typing.TYPE_CHECKING:
     from backend.src.domain import uow
 
 
 class ApplicationContainer(containers.DeclarativeContainer):
-    # FIXME: Hardcode ?
     wiring_config = containers.WiringConfiguration(
         modules=[
             "backend.src.presentation.routers.projects",

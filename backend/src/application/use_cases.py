@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import uuid
 import typing
+import uuid
 
 from backend.src.domain import entities
 
@@ -11,7 +11,8 @@ if typing.TYPE_CHECKING:
 
 
 async def create_project(
-    data: dtos.ProjectCreateDTO, uow: uow_.IProjectUnitOfWork,
+    data: dtos.ProjectCreateDTO,
+    uow: uow_.IProjectUnitOfWork,
 ) -> entities.Project:
     entity = entities.Project(**data.model_dump())
     async with uow:
@@ -21,7 +22,8 @@ async def create_project(
 
 
 async def update_project(
-    data: dtos.ProjectUpdateDTO, uow: uow_.IProjectUnitOfWork,
+    data: dtos.ProjectUpdateDTO,
+    uow: uow_.IProjectUnitOfWork,
 ) -> entities.Project | None:
     async with uow:
         project = await uow.projects.get_by_id(data.id)
@@ -34,7 +36,8 @@ async def update_project(
 
 
 async def delete_project(
-    project_id: uuid.UUID, uow: uow_.IProjectUnitOfWork,
+    project_id: uuid.UUID,
+    uow: uow_.IProjectUnitOfWork,
 ) -> bool:
     async with uow:
         project = await uow.projects.get_by_id(project_id)
@@ -60,7 +63,8 @@ async def get_published_projects(
 
 
 async def get_project_by_id(
-    project_id: uuid.UUID, uow: uow_.IProjectUnitOfWork,
+    project_id: uuid.UUID,
+    uow: uow_.IProjectUnitOfWork,
 ) -> entities.Project | None:
     async with uow:
         return await uow.projects.get_by_id(project_id)

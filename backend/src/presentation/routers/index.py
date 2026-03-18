@@ -1,12 +1,11 @@
-from __future__ import annotations
 
 import fastapi
-from fastapi import responses
 from dependency_injector import wiring
+from fastapi import responses
 
-from backend.src.domain import uow as uow_
 from backend.config import containers
 from backend.src.application import use_cases
+from backend.src.domain import uow as uow_
 from backend.src.infrastructure import timezone
 
 router = fastapi.APIRouter()

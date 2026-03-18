@@ -8,7 +8,7 @@ from functools import lru_cache
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from backend.config.paths import PROJECT_ROOT, TEMPLATES_DIR, STATIC_DIR, BLOG_DIR
+from backend.config.paths import PROJECT_ROOT
 
 
 class Config(BaseSettings):
@@ -35,19 +35,7 @@ class Config(BaseSettings):
     allowed_hosts: list[str] = []
 
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/me"
-    echo: bool = True
-
-    @property
-    def templates_dir(self):
-        return TEMPLATES_DIR
-
-    @property
-    def static_dir(self):
-        return STATIC_DIR
-
-    @property
-    def blog_dir(self):
-        return BLOG_DIR
+    echo: bool = False
 
     @model_validator(mode="after")
     def _warn_insecure_defaults(self) -> Config:

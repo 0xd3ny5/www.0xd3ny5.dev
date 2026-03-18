@@ -1,17 +1,14 @@
-from __future__ import annotations
-
 import uuid
 
 import fastapi
-from fastapi import responses
 from dependency_injector import wiring
+from fastapi import responses
 
-from backend.src.domain import uow as uow_
 from backend.config import containers
-from backend.src.presentation import dependencies
-from backend.src.application import use_cases
-from backend.src.application import dtos
+from backend.src.application import dtos, use_cases
+from backend.src.domain import uow as uow_
 from backend.src.infrastructure import blog
+from backend.src.presentation import dependencies
 
 router = fastapi.APIRouter(
     prefix="/admin",
@@ -34,15 +31,18 @@ async def admin_dashboard(
     projects = await use_cases.get_all_projects(uow)
     posts = _reader(request).list_posts_meta()
     return request.app.state.templates.TemplateResponse(
-        request, "admin/dashboard.html", {"projects": projects, "posts": posts},
+        request,
+        "admin/dashboard.html",
+        {"projects": projects, "posts": posts},
     )
-
 
 
 @router.get("/projects/new", response_class=responses.HTMLResponse)
 async def admin_new_project(request: fastapi.Request) -> fastapi.Response:
     return request.app.state.templates.TemplateResponse(
-        request, "admin/work_form.html", {"project": None, "is_edit": False},
+        request,
+        "admin/work_form.html",
+        {"project": None, "is_edit": False},
     )
 
 
@@ -93,7 +93,9 @@ async def admin_edit_project_form(
     if project is None:
         raise fastapi.HTTPException(status_code=404, detail="Project not found")
     return request.app.state.templates.TemplateResponse(
-        request, "admin/work_form.html", {"project": project, "is_edit": True},
+        request,
+        "admin/work_form.html",
+        {"project": project, "is_edit": True},
     )
 
 
@@ -160,11 +162,12 @@ async def admin_toggle_publish(
     return responses.RedirectResponse(url="/admin", status_code=303)
 
 
-
 @router.get("/blog/new", response_class=responses.HTMLResponse)
 async def admin_new_post(request: fastapi.Request) -> fastapi.Response:
     return request.app.state.templates.TemplateResponse(
-        request, "admin/post_form.html", {"post": None, "is_edit": False},
+        request,
+        "admin/post_form.html",
+        {"post": None, "is_edit": False},
     )
 
 
@@ -179,7 +182,9 @@ async def admin_create_post(
     cover: str = fastapi.Form(""),
     body: str = fastapi.Form(""),
 ) -> fastapi.Response:
-    safe_slug = "".join(c for c in slug.strip().lower().replace(" ", "-") if c.isalnum() or c == "-")
+    safe_slug = "".join(
+        c for c in slug.strip().lower().replace(" ", "-") if c.isalnum() or c == "-"
+    )
     if not safe_slug:
         raise fastapi.HTTPException(status_code=400, detail="Invalid slug")
     reader = _reader(request)
@@ -195,7 +200,9 @@ async def admin_edit_post(request: fastapi.Request, slug: str) -> fastapi.Respon
     if not post:
         raise fastapi.HTTPException(status_code=404, detail="Post not found")
     return request.app.state.templates.TemplateResponse(
-        request, "admin/post_form.html", {"post": post, "is_edit": True},
+        request,
+        "admin/post_form.html",
+        {"post": post, "is_edit": True},
     )
 
 

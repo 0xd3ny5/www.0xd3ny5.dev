@@ -1,17 +1,16 @@
 from __future__ import annotations
 
 import time
-from unittest.mock import patch
 
-import pytest
 import fastapi
+import pytest
 
 from backend.src.presentation.dependencies import (
+    _MAX_ATTEMPTS,
     _check_rate_limit,
-    _record_failure,
     _clear_failures,
     _failed,
-    _MAX_ATTEMPTS,
+    _record_failure,
 )
 
 

@@ -3,11 +3,10 @@ from __future__ import annotations
 import pytest
 
 from backend.src.infrastructure.blog import (
-    _parse_header,
     _build_meta,
     _dump,
+    _parse_header,
     _safe_slug,
-    PostMeta,
 )
 
 
@@ -136,27 +135,33 @@ class TestDump:
 
 
 class TestSafeSlug:
-    @pytest.mark.parametrize("slug", [
-        "hello-world",
-        "my_post",
-        "post123",
-        "a",
-        "ABC",
-    ])
+    @pytest.mark.parametrize(
+        "slug",
+        [
+            "hello-world",
+            "my_post",
+            "post123",
+            "a",
+            "ABC",
+        ],
+    )
     def test_valid_slugs(self, slug: str) -> None:
         assert _safe_slug(slug) == slug
 
-    @pytest.mark.parametrize("slug", [
-        "",
-        "  ",
-        "../etc/passwd",
-        "hello/world",
-        "hello\\world",
-        "..",
-        "hello\0world",
-        "hello world",
-        "hello.world",
-    ])
+    @pytest.mark.parametrize(
+        "slug",
+        [
+            "",
+            "  ",
+            "../etc/passwd",
+            "hello/world",
+            "hello\\world",
+            "..",
+            "hello\0world",
+            "hello world",
+            "hello.world",
+        ],
+    )
     def test_invalid_slugs(self, slug: str) -> None:
         assert _safe_slug(slug) is None
 

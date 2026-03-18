@@ -1,22 +1,18 @@
-from __future__ import annotations
-
 import logging
 import uuid as _uuid
 from contextlib import asynccontextmanager
 
 import fastapi
-from fastapi import staticfiles
-from fastapi import templating
+from fastapi import staticfiles, templating
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.responses import Response
 
-from backend.config import api_config
-from backend.config import containers
-from backend.config.paths import TEMPLATES_DIR, STATIC_DIR
-from backend.src.infrastructure import github
-from backend.src.infrastructure import blog
+from backend.config import api_config, containers
+from backend.config.paths import BLOG_DIR, STATIC_DIR, TEMPLATES_DIR
+from backend.src.infrastructure import blog, github
 
 logger = logging.getLogger(__name__)
 
@@ -25,39 +21,54 @@ logger = logging.getLogger(__name__)
 async def lifespan(app_: fastapi.FastAPI):
     cfg = api_config.get_config()
     app_.state.github_client = github.GitHubClient(
-        username=cfg.github_username, token=cfg.github_token,
+        username=cfg.github_username,
+        token=cfg.github_token,
     )
-    app_.state.blog_reader = blog.BlogReader(cfg.blog_dir)
+    app_.state.blog_reader = blog.BlogReader(BLOG_DIR)
     logger.info("Application started (debug=%s)", cfg.debug)
     yield
     logger.info("Application shut down")
 
 
 class SecurityHeadersMiddleware:
-    def __init__(self, app):  # type: ignore[no-untyped-def]
+    _CSP = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
+        "font-src 'self' https://fonts.gstatic.com; "
+        "img-src 'self' data: https:; "
+        "connect-src 'self'; "
+        "frame-ancestors 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self'"
+    )
+
+    def __init__(self, app, *, debug: bool = False):  # type: ignore[no-untyped-def]
         self.app = app
+        self._debug = debug
+        self._headers: list[tuple[bytes, bytes]] = [
+            (b"x-content-type-options", b"nosniff"),
+            (b"x-frame-options", b"DENY"),
+            (b"x-xss-protection", b"1; mode=block"),
+            (b"referrer-policy", b"strict-origin-when-cross-origin"),
+            (b"permissions-policy", b"camera=(), microphone=(), geolocation=()"),
+            (b"content-security-policy", self._CSP.encode()),
+        ]
+        if not debug:
+            self._headers.append(
+                (b"strict-transport-security", b"max-age=63072000; includeSubDomains"),
+            )
 
     async def __call__(self, scope, receive, send):  # type: ignore[no-untyped-def]
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
 
-        cfg = api_config.get_config()
+        headers = self._headers
 
         async def send_with_headers(message):  # type: ignore[no-untyped-def]
             if message["type"] == "http.response.start":
-                extra = [
-                    (b"x-content-type-options", b"nosniff"),
-                    (b"x-frame-options", b"DENY"),
-                    (b"x-xss-protection", b"1; mode=block"),
-                    (b"referrer-policy", b"strict-origin-when-cross-origin"),
-                    (b"permissions-policy", b"camera=(), microphone=(), geolocation=()"),
-                ]
-                if not cfg.debug:
-                    extra.append(
-                        (b"strict-transport-security", b"max-age=63072000; includeSubDomains"),
-                    )
-                message["headers"] = list(message.get("headers", [])) + extra
+                message["headers"] = list(message.get("headers", [])) + headers
             await send(message)
 
         await self.app(scope, receive, send_with_headers)
@@ -89,6 +100,36 @@ class RequestIdMiddleware:
         await self.app(scope, receive, send_with_request_id)
 
 
+class StaticCacheMiddleware:
+    """Add Cache-Control headers for static assets."""
+
+    def __init__(self, app, *, max_age: int = 86400):  # type: ignore[no-untyped-def]
+        self.app = app
+        self._cache_header = f"public, max-age={max_age}".encode()
+
+    async def __call__(self, scope, receive, send):  # type: ignore[no-untyped-def]
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        path: str = scope.get("path", "")
+        is_static = path.startswith("/static/")
+        cache_header = self._cache_header
+
+        if not is_static:
+            await self.app(scope, receive, send)
+            return
+
+        async def send_with_cache(message):  # type: ignore[no-untyped-def]
+            if message["type"] == "http.response.start":
+                message["headers"] = list(message.get("headers", [])) + [
+                    (b"cache-control", cache_header),
+                ]
+            await send(message)
+
+        await self.app(scope, receive, send_with_cache)
+
+
 def create_app() -> fastapi.FastAPI:
     cfg = api_config.get_config()
 
@@ -108,6 +149,8 @@ def create_app() -> fastapi.FastAPI:
     container = containers.ApplicationContainer()
     app_.container = container  # type: ignore[attr-defined]
 
+    # --- Middleware stack (order: last added = first executed) ---
+
     app_.add_middleware(
         CORSMiddleware,
         allow_origins=cfg.allowed_origins,
@@ -118,10 +161,16 @@ def create_app() -> fastapi.FastAPI:
     if not cfg.debug and cfg.allowed_hosts:
         app_.add_middleware(TrustedHostMiddleware, allowed_hosts=cfg.allowed_hosts)
 
-    app_.add_middleware(SecurityHeadersMiddleware)
+    app_.add_middleware(GZipMiddleware, minimum_size=500)
+    app_.add_middleware(SecurityHeadersMiddleware, debug=cfg.debug)
     app_.add_middleware(RequestIdMiddleware)
+    app_.add_middleware(StaticCacheMiddleware, max_age=86400)
 
-    from backend.src.presentation.routers import projects, admin, index, blog as blog_router, pages
+    # --- Routers ---
+
+    from backend.src.presentation.routers import admin, index, pages, projects
+    from backend.src.presentation.routers import blog as blog_router
+
     app_.include_router(index.router)
     app_.include_router(projects.router)
     app_.include_router(blog_router.router)
@@ -139,7 +188,8 @@ def create_app() -> fastapi.FastAPI:
 
 
 def _register_error_handlers(
-    app_: fastapi.FastAPI, templates: templating.Jinja2Templates,
+    app_: fastapi.FastAPI,
+    templates: templating.Jinja2Templates,
 ) -> None:
     @app_.exception_handler(StarletteHTTPException)
     async def http_error(request: fastapi.Request, exc: StarletteHTTPException) -> Response:
@@ -150,19 +200,30 @@ def _register_error_handlers(
             )
         if exc.status_code == 429:
             return templates.TemplateResponse(
-                request, "errors/404.html", {"active_page": ""}, status_code=429,
+                request,
+                "errors/404.html",
+                {"active_page": ""},
+                status_code=429,
             )
         tpl = "errors/404.html" if exc.status_code < 500 else "errors/500.html"
         return templates.TemplateResponse(
-            request, tpl, {"active_page": ""}, status_code=exc.status_code,
+            request,
+            tpl,
+            {"active_page": ""},
+            status_code=exc.status_code,
         )
 
     @app_.exception_handler(Exception)
     async def unhandled_error(request: fastapi.Request, exc: Exception) -> Response:
         request_id = request.scope.get("state", {}).get("request_id", "unknown")
-        logger.exception("Unhandled [request_id=%s]: %s %s", request_id, request.method, request.url)
+        logger.exception(
+            "Unhandled [request_id=%s]: %s %s", request_id, request.method, request.url
+        )
         return templates.TemplateResponse(
-            request, "errors/500.html", {"active_page": ""}, status_code=500,
+            request,
+            "errors/500.html",
+            {"active_page": ""},
+            status_code=500,
         )
 
 

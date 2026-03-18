@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import fastapi
 from fastapi import responses
 
@@ -13,7 +11,9 @@ async def blog_list(request: fastapi.Request) -> fastapi.Response:
     reader: blog.BlogReader = request.app.state.blog_reader
     posts = reader.get_all_posts()
     return request.app.state.templates.TemplateResponse(
-        request, "blog.html", {"posts": posts, "active_page": "blog"},
+        request,
+        "blog.html",
+        {"posts": posts, "active_page": "blog"},
     )
 
 
@@ -24,5 +24,7 @@ async def blog_post(request: fastapi.Request, slug: str) -> fastapi.Response:
     if not post:
         raise fastapi.HTTPException(status_code=404, detail="Post not found")
     return request.app.state.templates.TemplateResponse(
-        request, "post.html", {"post": post, "active_page": "blog"},
+        request,
+        "post.html",
+        {"post": post, "active_page": "blog"},
     )

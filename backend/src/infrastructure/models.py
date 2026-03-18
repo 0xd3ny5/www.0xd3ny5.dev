@@ -1,9 +1,9 @@
-import uuid
 import datetime
+import uuid
 
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
 from sqlalchemy import orm
+from sqlalchemy.dialects import postgresql
 
 from backend.src.infrastructure import orm as orm_
 
@@ -12,7 +12,9 @@ class ProjectModel(orm_.Base):
     __tablename__ = "projects"
 
     id: orm.Mapped[uuid.UUID] = orm.mapped_column(
-        postgresql.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4,
+        postgresql.UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
     )
     title: orm.Mapped[str] = orm.mapped_column(sa.String(200), nullable=False)
     short_description: orm.Mapped[str] = orm.mapped_column(sa.Text, nullable=False)
@@ -25,5 +27,7 @@ class ProjectModel(orm_.Base):
     is_published: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False, index=True)
     sort_order: orm.Mapped[int] = orm.mapped_column(sa.Integer, default=0)
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(
-        sa.DateTime(timezone=True), server_default=sa.func.now(), index=True,
+        sa.DateTime(timezone=True),
+        server_default=sa.func.now(),
+        index=True,
     )

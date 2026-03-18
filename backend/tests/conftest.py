@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-import uuid
 import typing
+import uuid
 from pathlib import Path
 
 import pytest
 import typing_extensions
 
-from backend.src.domain import entities
-from backend.src.domain import repositories
+from backend.src.domain import entities, repositories
 from backend.src.domain import uow as uow_
 
 

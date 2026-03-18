@@ -5,6 +5,7 @@ __pycache__/
 dist/
 build/
 .venv/
+.wslvenv/
 
 # Environment
 .env
@@ -26,3 +27,4 @@ Thumbs.db
 htmlcov/
 .pytest_cache/
 .mypy_cache/
+.ruff_cache/

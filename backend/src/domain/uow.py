@@ -1,5 +1,6 @@
 import abc
 import typing
+
 import typing_extensions
 
 from backend.src.domain import repositories
@@ -18,9 +19,7 @@ class IProjectUnitOfWork(abc.ABC):
         await self._commit()
 
     @abc.abstractmethod
-    async def rollback(self) -> None:
-        ...
+    async def rollback(self) -> None: ...
 
     @abc.abstractmethod
-    async def _commit(self) -> None:
-        ...
+    async def _commit(self) -> None: ...

@@ -5,16 +5,15 @@ from __future__ import annotations
 import asyncio
 from logging.config import fileConfig
 
+from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
-
-from alembic import context
 
 from backend.config import api_config
 from backend.src.infrastructure import orm
 
 # import all models so Base.metadata is populated
-from backend.src.infrastructure.models import ProjectModel # noqa: F401
+from backend.src.infrastructure.models import ProjectModel  # noqa: F401
 
 config = context.config
 

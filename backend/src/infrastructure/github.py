@@ -21,7 +21,7 @@ class GitHubStats(typing.TypedDict):
 
 
 class GitHubClient:
-    __slots__ = ("_username", "_headers", "_ttl", "_cached", "_cached_at")
+    __slots__ = ("_cached", "_cached_at", "_headers", "_ttl", "_username")
 
     def __init__(self, username: str, token: str = "", cache_ttl: int = 600) -> None:
         self._username = username
@@ -51,10 +51,14 @@ class GitHubClient:
         )
 
     async def _get_json(
-        self, path: str, params: dict[str, typing.Any] | None = None,
+        self,
+        path: str,
+        params: dict[str, typing.Any] | None = None,
     ) -> typing.Any:
         async with httpx.AsyncClient(
-            base_url=_BASE, headers=self._headers, timeout=_TIMEOUT,
+            base_url=_BASE,
+            headers=self._headers,
+            timeout=_TIMEOUT,
         ) as client:
             return await self._request(client, path, params)
 
@@ -79,7 +83,9 @@ class GitHubClient:
                     return {} if attempt == _MAX_RETRIES else None
                 last_exc = exc
             except httpx.RequestError as exc:
-                logger.warning("GitHub request error on %s (attempt %d): %s", path, attempt + 1, exc)
+                logger.warning(
+                    "GitHub request error on %s (attempt %d): %s", path, attempt + 1, exc
+                )
                 last_exc = exc
         if last_exc:
             raise last_exc
@@ -87,7 +93,9 @@ class GitHubClient:
 
     async def _fetch_stats(self) -> GitHubStats:
         async with httpx.AsyncClient(
-            base_url=_BASE, headers=self._headers, timeout=_TIMEOUT,
+            base_url=_BASE,
+            headers=self._headers,
+            timeout=_TIMEOUT,
         ) as client:
             user = await self._request(client, f"/users/{self._username}")
             stars = await self._total_stars(client)

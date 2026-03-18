@@ -1,27 +1,26 @@
 from __future__ import annotations
 
-import uuid
 import typing
+import uuid
 
 import sqlalchemy as sa
 from sqlalchemy.ext import asyncio as sa_async
 
 from backend.src.domain import repositories
-from backend.src.infrastructure import mapper
-from backend.src.infrastructure import models
+from backend.src.infrastructure import mapper, models
 
 if typing.TYPE_CHECKING:
     from backend.src.domain import entities
 
 
 class PGProjectRepository(repositories.IProjectRepository):
-    __slots__: typing.Sequence[str] = ("_session", "_mapper",)
+    __slots__: typing.Sequence[str] = ("_mapper", "_session")
 
     def __init__(self, session: sa_async.AsyncSession) -> None:
         self._session = session
         self._mapper = mapper.ProjectMapper()
 
-    async def get_published(self) -> typing.List[entities.Project]:
+    async def get_published(self) -> list[entities.Project]:
         result = await self._session.execute(
             sa.select(models.ProjectModel)
             .where(models.ProjectModel.is_published)
@@ -33,7 +32,7 @@ class PGProjectRepository(repositories.IProjectRepository):
         model = self._mapper.to_model(entity)
         self._session.add(model)
 
-    async def get_by_id(self, id: uuid.UUID) -> typing.Optional[entities.Project]:
+    async def get_by_id(self, id: uuid.UUID) -> entities.Project | None:
         result = await self._session.execute(
             sa.select(models.ProjectModel).where(models.ProjectModel.id == id)
         )
@@ -43,14 +42,10 @@ class PGProjectRepository(repositories.IProjectRepository):
 
         return self._mapper.to_entity(model)
 
-    async def get_all(self) -> typing.List[entities.Project]:
+    async def get_all(self) -> list[entities.Project]:
         result = await self._session.execute(
-            (
-                sa.select(models.ProjectModel)
-                .order_by(
-                    models.ProjectModel.sort_order,
-                    models.ProjectModel.created_at.desc()
-                )
+            sa.select(models.ProjectModel).order_by(
+                models.ProjectModel.sort_order, models.ProjectModel.created_at.desc()
             )
         )
         return [self._mapper.to_entity(m) for m in result.scalars().all()]

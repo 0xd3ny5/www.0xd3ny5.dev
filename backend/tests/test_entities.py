@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import uuid
 
+from backend.src.application.dtos import ProjectCreateDTO, ProjectUpdateDTO
 from backend.src.domain.entities import Project
 from backend.src.infrastructure.mapper import ProjectMapper
 from backend.src.infrastructure.models import ProjectModel
-from backend.src.application.dtos import ProjectCreateDTO, ProjectUpdateDTO
 
 
 class TestProject:

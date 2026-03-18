@@ -51,7 +51,10 @@ class TestGetPost:
 
     def test_post_with_all_meta(self, tmp_blog_dir: Path) -> None:
         _write_post(
-            tmp_blog_dir, "full", "Full Post", "Content",
+            tmp_blog_dir,
+            "full",
+            "Full Post",
+            "Content",
             date="2026-03-15",
             tags="a, b",
             description="A desc",
@@ -102,7 +105,9 @@ class TestGetAllPosts:
 
     def test_multiple_posts(self, tmp_blog_dir: Path) -> None:
         for i in range(5):
-            _write_post(tmp_blog_dir, f"post-{i}", f"Post {i}", f"Body {i}", date=f"2026-0{i+1}-01")
+            _write_post(
+                tmp_blog_dir, f"post-{i}", f"Post {i}", f"Body {i}", date=f"2026-0{i + 1}-01"
+            )
         reader = BlogReader(tmp_blog_dir)
         assert len(reader.get_all_posts()) == 5
 
@@ -130,7 +135,9 @@ class TestWritePost:
 
     def test_written_post_readable(self, tmp_blog_dir: Path) -> None:
         reader = BlogReader(tmp_blog_dir)
-        reader.write_post("rw", "Read Write", "2026-01-01", "a, b", "Desc", "https://img.com/1.jpg", "Content")
+        reader.write_post(
+            "rw", "Read Write", "2026-01-01", "a, b", "Desc", "https://img.com/1.jpg", "Content"
+        )
         post = reader.get_post("rw")
         assert post is not None
         assert post["title"] == "Read Write"

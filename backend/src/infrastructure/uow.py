@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import typing
-import typing_extensions
 
+import typing_extensions
 from sqlalchemy.ext import asyncio as sa_async
 
 from backend.src.domain import uow

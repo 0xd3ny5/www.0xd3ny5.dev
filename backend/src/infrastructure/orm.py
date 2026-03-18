@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import typing
-
 import sqlalchemy as sa
 from sqlalchemy import orm
 from sqlalchemy.ext import asyncio as sa_async
@@ -28,7 +26,7 @@ def create_async_engine(url: str, echo: bool) -> sa_async.AsyncEngine:
 
 
 def create_async_session(
-    engine_: sa_async.AsyncEngine
+    engine_: sa_async.AsyncEngine,
 ) -> sa_async.async_sessionmaker[sa_async.AsyncSession]:
     session = sa_async.async_sessionmaker(
         engine_,

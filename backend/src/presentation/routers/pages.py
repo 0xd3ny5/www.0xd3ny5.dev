@@ -1,12 +1,10 @@
-from __future__ import annotations
 
 import logging
 
 import fastapi
 from fastapi import responses
 
-from backend.src.infrastructure import github
-from backend.src.infrastructure import blog
+from backend.src.infrastructure import blog, github
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +14,9 @@ router = fastapi.APIRouter()
 @router.get("/about", response_class=responses.HTMLResponse)
 async def about(request: fastapi.Request) -> fastapi.Response:
     return request.app.state.templates.TemplateResponse(
-        request, "about.html", {"active_page": "about"},
+        request,
+        "about.html",
+        {"active_page": "about"},
     )
 
 
@@ -25,12 +25,14 @@ async def github_stats(request: fastapi.Request) -> responses.Response:
     client: github.GitHubClient = request.app.state.github_client
     try:
         stats = await client.get_stats()
-        return responses.JSONResponse({
-            "repos": stats["public_repos"],
-            "stars": stats["total_stars"],
-            "commits": stats["commits"],
-            "followers": stats["followers"],
-        })
+        return responses.JSONResponse(
+            {
+                "repos": stats["public_repos"],
+                "stars": stats["total_stars"],
+                "commits": stats["commits"],
+                "followers": stats["followers"],
+            }
+        )
     except Exception:
         logger.exception("Failed to fetch GitHub stats")
         return responses.JSONResponse({"error": "unavailable"}, status_code=503)

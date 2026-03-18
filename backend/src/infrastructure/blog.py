@@ -12,23 +12,56 @@ import nh3
 logger = logging.getLogger(__name__)
 
 _MD_EXTENSIONS = [
-    "fenced_code", "codehilite", "tables",
-    "toc", "smarty", "attr_list", "md_in_html",
+    "fenced_code",
+    "codehilite",
+    "tables",
+    "toc",
+    "smarty",
+    "attr_list",
+    "md_in_html",
 ]
 
 _ALLOWED_TAGS = {
-    "h1", "h2", "h3", "h4", "h5", "h6",
-    "p", "a", "em", "strong", "code", "pre",
-    "ul", "ol", "li", "blockquote", "hr", "br",
-    "img", "table", "thead", "tbody", "tr", "th", "td",
-    "div", "span", "del", "sup", "sub",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "p",
+    "a",
+    "em",
+    "strong",
+    "code",
+    "pre",
+    "ul",
+    "ol",
+    "li",
+    "blockquote",
+    "hr",
+    "br",
+    "img",
+    "table",
+    "thead",
+    "tbody",
+    "tr",
+    "th",
+    "td",
+    "div",
+    "span",
+    "del",
+    "sup",
+    "sub",
 }
 _ALLOWED_ATTRS: dict[str, set[str]] = {
     "a": {"href", "title", "target"},
     "img": {"src", "alt", "title"},
-    "code": {"class"}, "pre": {"class"},
-    "div": {"class"}, "span": {"class"},
-    "td": {"align"}, "th": {"align"},
+    "code": {"class"},
+    "pre": {"class"},
+    "div": {"class"},
+    "span": {"class"},
+    "td": {"align"},
+    "th": {"align"},
 }
 
 _SEP = "---"
@@ -65,13 +98,13 @@ def _parse_header(raw: str) -> tuple[dict[str, str], str]:
     if not text.startswith(_SEP):
         return {}, text
 
-    rest = text[len(_SEP):]
+    rest = text[len(_SEP) :]
     close = rest.find(f"\n{_SEP}")
     if close == -1:
         return {}, text
 
     header = rest[:close]
-    body = rest[close + 1 + len(_SEP):].lstrip("\n")
+    body = rest[close + 1 + len(_SEP) :].lstrip("\n")
 
     meta: dict[str, str] = {}
     for line in header.strip().splitlines():
@@ -79,7 +112,7 @@ def _parse_header(raw: str) -> tuple[dict[str, str], str]:
         if idx == -1:
             continue
         key = line[:idx].strip()
-        val = line[idx + 1:].strip()
+        val = line[idx + 1 :].strip()
         if key:
             meta[key] = val
 
@@ -179,17 +212,25 @@ class BlogReader:
                 continue
             meta_dict, _ = _parse_header(raw)
             meta = _build_meta(meta_dict, md.stem)
-            result.append({
-                "slug": md.stem,
-                "title": meta.title,
-                "date": meta.date,
-                "tags": ", ".join(meta.tags),
-            })
+            result.append(
+                {
+                    "slug": md.stem,
+                    "title": meta.title,
+                    "date": meta.date,
+                    "tags": ", ".join(meta.tags),
+                }
+            )
         return result
 
     def write_post(
-        self, slug: str, title: str, date: str, tags: str,
-        description: str, cover: str, body: str,
+        self,
+        slug: str,
+        title: str,
+        date: str,
+        tags: str,
+        description: str,
+        cover: str,
+        body: str,
     ) -> None:
         safe = _safe_slug(slug)
         if safe is None:
@@ -207,7 +248,8 @@ class BlogReader:
             meta["cover"] = cover
 
         (self._dir / f"{safe}.md").write_text(
-            _dump(meta, body), encoding="utf-8",
+            _dump(meta, body),
+            encoding="utf-8",
         )
 
     def delete_post(self, slug: str) -> bool:

@@ -1,15 +1,11 @@
-from __future__ import annotations
-
-import datetime
-import uuid
 import typing
+import uuid
 
 import pydantic
 
 from backend.src.infrastructure import timezone
 
-if typing.TYPE_CHECKING:
-    from backend.src.domain import entities
+from backend.src.domain import entities
 
 
 class ProjectResponse(pydantic.BaseModel):
