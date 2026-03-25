@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/Docker-containerized-1D4ED8?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
 
   <h1>denys.dev</h1>
-  <p>Personal portfolio & blog — FastAPI, DDD, Docker.</p>
+  <p>Personal portfolio & blog.</p>
 
 </div>
 
