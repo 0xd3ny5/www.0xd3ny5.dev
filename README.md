@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/PostgreSQL-database-334155?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
   <img src="https://img.shields.io/badge/Docker-containerized-1D4ED8?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
 
-  <h1>denys.dev</h1>
+  <h1>0xd3ny5.dev</h1>
   <p>Personal portfolio & blog.</p>
 
 </div>
