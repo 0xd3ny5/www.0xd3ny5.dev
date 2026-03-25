@@ -11,10 +11,52 @@
 
 ---
 
+<h3>System Architecture</h3>
+
+<div align="center">
+  <img src="static/assets/arch.png" alt="Architecture diagram" width="920" />
+  <p>
+    <em>
+      Simplified architecture of the project.
+    </em>
+  </p>
+</div>
+
+<br />
+
+<h3>Functional Showcase</h3>
+
+<div align="center">
+
+<table>
+  <tr>
+    <td align="center" valign="top" width="50%">
+      <video src="" autoplay loop muted playsinline width="100%"></video>
+      <br />
+      <strong>Public Interface</strong>
+      <br />
+      <sub>
+        Public portfolio.
+      </sub>
+    </td>
+    <td align="center" valign="top" width="50%">
+      <video src="" autoplay loop muted playsinline width="100%"></video>
+      <br />
+      <strong>Admin Interface</strong>
+      <br />
+      <sub>
+        Admin interface.
+      </sub>
+    </td>
+  </tr>
+</table>
+
+</div>
+
 ## Quick Start
 
 ```bash
-git clone <repo-url> && cd me
+git clone https://github.com/0xd3ny5/www.0xd3ny5.dev && cd me
 cp .env.example .env        # edit SECRET_KEY, ADMIN_PASSWORD, etc.
 make docker-up               # or: docker compose up -d --build
 ```
